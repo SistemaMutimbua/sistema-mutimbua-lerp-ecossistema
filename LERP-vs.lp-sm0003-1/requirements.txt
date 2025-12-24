@@ -3,3 +3,4 @@ SQLAlchemy
 ReportLab
 Werkzeug
 pandas
+gunicorn
