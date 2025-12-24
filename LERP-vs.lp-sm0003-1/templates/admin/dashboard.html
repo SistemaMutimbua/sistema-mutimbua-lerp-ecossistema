@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-3">
+  <h4 class="text-primary"><i class="bi bi-speedometer2"></i> Painel do Superadmin</h4>
+  <p class="text-muted">Bem-vindo ao centro de controle do sistema LERP Gestão Integral.</p>
+  <hr>
+
+  <!-- Cartões de resumo com mini gráficos -->
+  <div class="row g-3 mb-3">
+
+    <!-- Usuários -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-people-fill text-primary fs-2 me-3"></i>
+            <div>
+              <h6 class="mb-1">Usuários Ativos</h6>
+              <span class="fw-bold fs-5">{{ total_usuarios }}</span>
+            </div>
+          </div>
+          <!-- Barra de progresso fictícia -->
+          <div class="progress mt-2" style="height:6px;">
+            <div class="progress-bar bg-primary" role="progressbar" style="width: 70%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Produtos -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-box-seam text-info fs-2 me-3"></i>
+            <div>
+              <h6 class="mb-1">Produtos</h6>
+              <span class="fw-bold fs-5">{{ total_produtos }}</span>
+            </div>
+          </div>
+          <div class="progress mt-2" style="height:6px;">
+            <div class="progress-bar bg-info" role="progressbar" style="width: 55%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendas -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-cart-check-fill text-success fs-2 me-3"></i>
+            <div>
+              <h6 class="mb-1">Vendas</h6>
+              <span class="fw-bold fs-5">{{ total_vendas }}</span>
+            </div>
+          </div>
+          <div class="progress mt-2" style="height:6px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: 80%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Caixa -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-cash-stack text-warning fs-2 me-3"></i>
+            <div>
+              <h6 class="mb-1">Caixa</h6>
+              <span class="fw-bold fs-5">{{ total_caixa }}</span>
+            </div>
+          </div>
+          <div class="progress mt-2" style="height:6px;">
+            <div class="progress-bar bg-warning" role="progressbar" style="width: 65%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Últimas notificações -->
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-header bg-dark text-white">
+      <i class="bi bi-bell-fill"></i> Últimas Notificações
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for n in notificacoes %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ n.mensagem }}
+        <span class="badge bg-secondary rounded-pill">{{ n.data.strftime('%d/%m %H:%M') }}</span>
+      </li>
+      {% else %}
+      <li class="list-group-item text-center text-muted">
+        Nenhuma notificação recente.
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Gráficos resumidos -->
+  <div class="row mt-4 g-3">
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+          <i class="bi bi-bar-chart-fill"></i> Vendas Mensais
+        </div>
+        <div class="card-body">
+          <canvas id="vendasMensaisChart" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white">
+          <i class="bi bi-box-seam"></i> Estoque de Produtos
+        </div>
+        <div class="card-body">
+          <canvas id="estoqueChart" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Script Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctxVendas = document.getElementById('vendasMensaisChart').getContext('2d');
+new Chart(ctxVendas, {
+    type: 'bar',
+    data: {
+        labels: {{ meses|tojson }},  // Ex.: ['Jan', 'Fev', 'Mar']
+        datasets: [{
+            label: 'Vendas (MT)',
+            data: {{ vendas_mes|tojson }},
+            backgroundColor: 'rgba(40, 167, 69, 0.7)',
+            borderColor: 'rgba(40, 167, 69, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+});
+
+const ctxEstoque = document.getElementById('estoqueChart').getContext('2d');
+new Chart(ctxEstoque, {
+    type: 'doughnut',
+    data: {
+        labels: {{ produtos_labels|tojson }}, // nomes dos produtos
+        datasets: [{
+            label: 'Estoque',
+            data: {{ produtos_estoque|tojson }},
+            backgroundColor: ['#0d6efd','#198754','#dc3545','#ffc107','#6c757d']
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+});
+</script>
+
+{% endblock %}

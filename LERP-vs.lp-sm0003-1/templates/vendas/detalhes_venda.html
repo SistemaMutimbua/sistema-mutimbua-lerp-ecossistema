@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0" style="border-radius: 20px;">
+        <div class="card-header text-white text-center" style="background-color: #003366; border-radius: 20px 20px 0 0;">
+            <h4>📦 Detalhes da Venda</h4>
+        </div>
+
+        <div class="card-body" style="background-color: #e6f0ff;">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Código do Produto:</strong> {{ venda.codigo_produto }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Produto:</strong> {{ venda.produto }}</p>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <p><strong>Preço Unitário:</strong> {{ "%.2f"|format(venda.preco_unitario) }} MT</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Quantidade:</strong> {{ venda.quantidade }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Valor Total:</strong> {{ "%.2f"|format(venda.valor_total) }} MT</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Data da Venda:</strong> {{ venda.data_venda.strftime('%d/%m/%Y') }}</p>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('vendas.lista_vendas') }}" class="btn btn-secondary me-2">
+                    ⬅ Voltar à Lista
+                </a>
+                <a href="{{ url_for('vendas.exportar_venda_pdf', id=venda.id) }}" class="btn btn-primary">
+                    📄 Exportar PDF
+                </a>
+                <a href="{{ url_for('vendas.excluir_venda', id=venda.id) }}" 
+                   class="btn" 
+                   style="background-color: #cc0000; color: white;"
+                   onclick="return confirm('⚠ Tem certeza que deseja apagar esta venda? Esta ação não pode ser desfeita!')">
+                   🗑 Apagar Venda
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

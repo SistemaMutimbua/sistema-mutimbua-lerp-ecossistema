@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color:#132a63; color:white;">
+
+  <h3 class="fw-bold mb-4 text-center">🧾 {{ _('Lista de Vendas') }}</h3>
+
+  <div class="d-flex justify-content-between mb-3">
+    <div>
+      <a href="{{ url_for('vendas.exportar_excel') }}" class="btn btn-light btn-sm fw-bold">📊 {{ _('Exportar Excel') }}</a>
+      <a href="{{ url_for('vendas.exportar_pdf') }}" class="btn btn-light btn-sm fw-bold">📄 {{ _('Exportar PDF') }}</a>
+    </div>
+    <a href="{{ url_for('vendas.nova_venda') }}" class="btn btn-success fw-bold">➕ {{ _('Nova Venda') }}</a>
+  </div>
+
+  <form method="GET" class="d-flex mb-3">
+    <input type="text" name="filtro" class="form-control w-50 me-2" placeholder="{{ _('Pesquisar produto...') }}">
+    <button class="btn btn-dark fw-bold">🔍 {{ _('Filtrar') }}</button>
+  </form>
+
+  {% if vendas %}
+  <div class="tabela-scroll">
+    <table class="table table-hover table-bordered tabela-lerp">
+      <thead>
+        <tr>
+          <th>{{ _('Código') }}</th>
+          <th>{{ _('Produto') }}</th>
+          <th>{{ _('Quantidade') }}</th>
+          <th>{{ _('Preço Unitário') }}</th>
+          <th>{{ _('Valor Total') }}</th>
+          <th>{{ _('Lucro Total') }}</th>
+          <th>{{ _('Data da Venda') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vendas %}
+        <tr class="linha-dove">
+          <td>{{ v.codigo_produto }}</td>
+          <td>{{ v.produto }}</td>
+          <td>{{ "%.2f"|format(v.quantidade) }}</td>
+          <td>{{ "%.2f"|format(v.preco_unitario) }}</td>
+          <td class="fw-bold text-primary text-end">{{ "%.2f"|format(v.valor_total) }}</td>
+          <td class="fw-bold text-success text-end">{{ "%.2f"|format(v.lucro_total) }}</td>
+          <td>{{ v.data_venda.strftime("%d/%m/%Y %H:%M") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-end mt-3">
+    <h5 class="me-4 text-success">{{ _('Total Vendas') }}: {{ "%.2f"|format(total_vendas) }} MT</h5>
+    <h5 class="text-warning">{{ _('Total Lucro') }}: {{ "%.2f"|format(total_lucro) }} MT</h5>
+  </div>
+
+  {% else %}
+  <div class="alert alert-info text-center">{{ _('Nenhuma venda registrada.') }}</div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

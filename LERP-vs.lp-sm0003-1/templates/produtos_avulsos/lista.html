@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Produtos Avulsos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Produtos Avulsos</h1>
+    <a href="{{ url_for('produtos_avulsos.cadastrar') }}" class="btn btn-success mb-3">Novo Produto Avulso</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th>Preço</th>
+                <th>Unidade</th>
+                <th>Total Vendido</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr>
+                <td>{{ produto.codigo }}</td>
+                <td>{{ produto.descricao }}</td>
+                <td>{{ produto.preco | round(2) }}</td>
+                <td>{{ produto.unidade }}</td>
+                <td>{{ produto.total_vendido | round(2) }}</td>
+                <td>
+                    <a href="{{ url_for('produtos_avulsos.editar', id=produto.id) }}" class="btn btn-primary btn-sm">Editar</a>
+                    <a href="{{ url_for('produtos_avulsos.apagar', id=produto.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja apagar este produto?')">Apagar</a>
+                    <a href="{{ url_for('produtos_avulsos.entrada', produto_id=produto.id) }}" class="btn btn-info btn-sm">Entrada</a>
+                    <a href="{{ url_for('produtos_avulsos.vender', produto_id=produto.id) }}" class="btn btn-success btn-sm">Vender</a>
+                    <a href="{{ url_for('produtos_avulsos.detalhes', id=produto.id) }}" class="btn btn-secondary btn-sm">Detalhes</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum produto cadastrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

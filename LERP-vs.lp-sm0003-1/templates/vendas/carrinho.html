@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Carrinho de Vendas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Carrinho de Vendas</h2>
+
+    {% if carrinho %}
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Valor Unitário (MT)</th>
+                <th>Valor Total (MT)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in carrinho %}
+            <tr>
+                <td>{{ item.descricao }}</td>
+                <td>{{ item.quantidade }}</td>
+                <td>{{ "%.2f"|format(item.valor_unitario) }}</td>
+                <td>{{ "%.2f"|format(item.valor_total) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="table-secondary">
+                <th colspan="3" class="text-end">Total Geral:</th>
+                <th>{{ "%.2f"|format(total_geral) }} MT</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <a href="{{ url_for('vendas.nova_venda', nova=1) }}" class="btn btn-danger">Limpar Carrinho</a>
+    <a href="{{ url_for('vendas.nova_venda') }}" class="btn btn-secondary">Adicionar mais produtos</a>
+    <a href="{{ url_for('pagamentos.novo_pagamento', total=total_geral) }}" class="btn btn-success">Finalizar Pagamento</a>
+
+    {% else %}
+    <div class="alert alert-info">
+        Carrinho vazio. <a href="{{ url_for('vendas.nova_venda') }}">Adicionar produtos</a>.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

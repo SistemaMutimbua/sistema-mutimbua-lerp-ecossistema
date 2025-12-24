@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  body {
+    background: linear-gradient(135deg, #0a3d62, #1e90ff);
+    font-family: "Poppins", sans-serif;
+    color: #2d3436;
+  }
+  .painel-wrapper { padding: 40px 20px; }
+  .painel-header {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+  }
+  .painel-header h3 { color: #0a3d62; font-weight: 600; }
+  .btn-logout {
+    background-color: #dc3545;
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: 0.3s;
+  }
+  .btn-logout:hover { background-color: #b02a37; }
+  .painel-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .painel-card {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+  }
+  .painel-card:hover { transform: translateY(-3px); }
+  .painel-card h6 { color: #636e72; font-weight: 500; margin-bottom: 10px; }
+  .painel-card .valor {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #0a3d62;
+  }
+  .auditoria-section {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 40px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+  }
+  .auditoria-section h5 { color: #1e90ff; font-weight: 600; }
+  table { border-radius: 10px; overflow: hidden; }
+  thead { background-color: #1e90ff; color: white; }
+  tbody tr:hover { background-color: #f0f8ff; transition: 0.2s; }
+  .footer-info {
+    text-align: center;
+    margin-top: 40px;
+    color: #dfe6e9;
+    font-size: 0.9rem;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeInUp 0.5s ease forwards; }
+</style>
+
+<div class="painel-wrapper fade-in">
+
+  <!-- Cabeçalho -->
+  <div class="painel-header">
+    <h3><i class="bi bi-shield-lock text-primary"></i> {{ _("Painel do Superadmin") }}</h3>
+    <a href="{{ url_for('admin.logout_admin') }}" class="btn-logout">
+      <i class="bi bi-box-arrow-right"></i> {{ _("Sair") }}
+    </a>
+  </div>
+
+  <!-- Cartões -->
+  <div class="painel-cards">
+    <div class="painel-card text-center">
+      <h6>{{ _("Total de Produtos") }}</h6>
+      <div class="valor">{{ total_produtos or 0 }}</div>
+    </div>
+
+    <div class="painel-card text-center">
+      <h6>{{ _("Vendas Realizadas") }}</h6>
+      <div class="valor text-success">{{ total_vendas or 0 }}</div>
+    </div>
+
+    <div class="painel-card text-center">
+      <h6>{{ _("Pagamentos Processados") }}</h6>
+      <div class="valor text-primary">{{ total_pagamentos or 0 }}</div>
+    </div>
+
+    <div class="painel-card text-center">
+      <h6>{{ _("Usuários Ativos") }}</h6>
+      <div class="valor text-info">{{ total_usuarios or 1 }}</div>
+    </div>
+  </div>
+
+  <!-- Auditoria -->
+  <div class="auditoria-section mt-5">
+    <h5><i class="bi bi-activity"></i> {{ _("Auditoria de Operações") }}</h5>
+
+    {% if acoes %}
+    <div class="table-responsive mt-3">
+      <table class="table table-striped table-hover align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ _("Usuário") }}</th>
+            <th>{{ _("Ação") }}</th>
+            <th>{{ _("Data e Hora") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in acoes %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ a.usuario }}</td>
+            <td>{{ a.acao }}</td>
+            <td>{{ a.data.strftime("%d/%m/%Y %H:%M") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-3">
+      {{ _("Nenhuma operação registrada na auditoria até o momento.") }}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="footer-info">
+    © 2025 <strong>LERP Gestão Integral</strong> | {{ _("Desenvolvido por") }} <strong>Mutimbua</strong>
+  </div>
+
+</div>
+
+{% endblock %}

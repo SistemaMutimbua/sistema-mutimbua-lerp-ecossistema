@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="{{ current_locale }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ titulo_pagina or _("LERP Management System") }}</title>
+
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+        }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 220px;
+            height: 100%;
+            background: #0d1b2a;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            overflow-x: hidden;
+            z-index: 1000;
+        }
+
+        .sidebar h4 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .sidebar a:hover {
+            background-color: #1b263b;
+        }
+
+        .sidebar a.text-danger:hover {
+            background-color: #b22222;
+        }
+
+        .menu-text {
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            display: none;
+        }
+
+        .sidebar.collapsed a {
+            justify-content: center;
+        }
+
+        .toggle-sidebar {
+            color: #fff;
+            cursor: pointer;
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        /* ================= SUBMENU ================= */
+        .menu-group .submenu {
+            display: none;
+            flex-direction: column;
+        }
+
+        .menu-group .submenu a {
+            padding: 8px 15px;
+            font-size: 13px;
+            color: #fff;
+        }
+
+        .menu-group .submenu a:hover {
+            background-color: #1b263b;
+        }
+
+        .submenu-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .submenu-open {
+            transform: rotate(180deg);
+        }
+
+        /* ================= CONTENT ================= */
+        .content {
+            margin-left: 240px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .content.collapsed {
+            margin-left: 90px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .top-bar h5 {
+            color: #0d1b2a;
+            font-weight: bold;
+        }
+
+        /* ================= QUICK ACTIONS ================= */
+        .quick-actions {
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.15);
+            margin-bottom: 15px;
+            border-left: 4px solid #1b263b;
+        }
+
+        .quick-actions-toggle {
+            cursor: pointer;
+            font-weight: bold;
+            color: #0d1b2a;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .quick-actions-buttons {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .quick-actions-buttons a {
+            margin-bottom: 6px;
+        }
+
+        /* ================= FLASH ================= */
+        .flash-message {
+            font-weight: bold;
+        }
+
+        /* ================= TOP ICONS ================= */
+        .notification-icon {
+            font-size: 20px;
+            color: #0d1b2a;
+        }
+
+        .btn-logout {
+            color: #dc3545;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-logout:hover {
+            text-decoration: underline;
+        }
+
+        /* ================= RESPONSIVO ================= */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            .content {
+                margin-left: 90px;
+            }
+            .menu-text {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<div class="sidebar">
+    <h4>{{ _("LERP Management System") }}</h4>
+
+    <div class="toggle-sidebar" onclick="toggleSidebar()">
+        <i class="bi bi-chevron-left" id="toggle-icon"></i>
+    </div>
+
+    <a href="{{ url_for('admin.dashboard') }}">
+        <i class="bi bi-speedometer2 text-info"></i>
+        <span class="menu-text">{{ _("Painel") }}</span>
+    </a>
+
+    <a href="{{ url_for('produtos.lista_produtos') }}">
+        <i class="bi bi-box-seam text-warning"></i>
+        <span class="menu-text">{{ _("Produtos") }}</span>
+    </a>
+
+    <!-- ======= Compras ======= -->
+    <div class="menu-group">
+        <a href="javascript:void(0);" onclick="toggleSubmenu('compras-sub')">
+            <i class="bi bi-cart-plus-fill text-success"></i>
+            <span class="menu-text">{{ _("Compras") }}</span>
+            <i class="bi bi-chevron-down ms-auto submenu-arrow" id="arrow-compras"></i>
+        </a>
+        <div class="submenu" id="compras-sub">
+            <a href="{{ url_for('compras.lista_compras') }}">
+                <span class="menu-text ps-4">{{ _("Lista de Compras") }}</span>
+            </a>
+            <a href="{{ url_for('compras.dashboard_compras') }}">
+                <span class="menu-text ps-4">{{ _("Dashboard Compras") }}</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ======= Vendas ======= -->
+    <div class="menu-group">
+        <a href="javascript:void(0);" onclick="toggleSubmenu('vendas-sub')">
+            <i class="bi bi-cash-coin text-primary"></i>
+            <span class="menu-text">{{ _("Vendas") }}</span>
+            <i class="bi bi-chevron-down ms-auto submenu-arrow" id="arrow-vendas"></i>
+        </a>
+        <div class="submenu" id="vendas-sub">
+            <a href="{{ url_for('vendas.lista_vendas') }}">
+                <span class="menu-text ps-4">{{ _("Lista de Vendas") }}</span>
+            </a>
+            <a href="{{ url_for('vendas.dashboard_vendas') }}">
+                <span class="menu-text ps-4">{{ _("Dashboard Vendas") }}</span>
+            </a>
+        </div>
+    </div>
+
+    <a href="{{ url_for('cotacoes.listar_cotacoes') }}">
+        <i class="bi bi-receipt text-info"></i>
+        <span class="menu-text">{{ _("Cotações") }}</span>
+    </a>
+
+    <a href="{{ url_for('pagamentos.lista_pagamentos') }}">
+        <i class="bi bi-wallet2 text-info"></i>
+        <span class="menu-text">{{ _("Pagamentos") }}</span>
+    </a>
+
+    <a href="{{ url_for('caixa.lista_caixa') }}">
+        <i class="bi bi-currency-exchange text-success"></i>
+        <span class="menu-text">{{ _("Caixa") }}</span>
+    </a>
+
+    <a href="{{ url_for('relatorios.dashboard') }}">
+        <i class="bi bi-bar-chart-fill text-secondary"></i>
+        <span class="menu-text">{{ _("Relatórios") }}</span>
+    </a>
+
+    <a href="{{ url_for('notificacoes.lista_notificacoes') }}">
+        <i class="bi bi-bell-fill text-warning"></i>
+        <span class="menu-text">{{ _("Notificações") }}</span>
+    </a>
+
+    <a href="{{ url_for('index') }}">
+        <i class="bi bi-eye-fill text-light"></i>
+        <span class="menu-text">{{ _("Auditoria") }}</span>
+    </a>
+
+    <a href="{{ url_for('admin.logout_admin') }}" class="mt-auto text-danger">
+        <i class="bi bi-box-arrow-right"></i>
+        <span class="menu-text">{{ _("Sair") }}</span>
+    </a>
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="content">
+
+    <!-- TOPO -->
+    <div class="top-bar">
+        <h5>{{ titulo_pagina or _("LERP Management System") }}</h5>
+
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ url_for('notificacoes.lista_notificacoes') }}">
+                <i class="bi bi-bell-fill notification-icon"></i>
+            </a>
+            <a href="{{ url_for('admin.logout_admin') }}" class="btn-logout">
+                <i class="bi bi-box-arrow-right"></i> {{ _("Sair") }}
+            </a>
+        </div>
+    </div>
+
+    <!-- AÇÕES RÁPIDAS -->
+    <div class="quick-actions">
+        <div class="quick-actions-toggle" onclick="toggleActions()">
+            <i class="bi bi-chevron-down" id="arrow-q"></i>
+            {{ _("Ações Rápidas") }}
+        </div>
+
+        <div class="quick-actions-buttons" id="qa-box">
+            <a href="{{ url_for('vendas.nova_venda') }}" class="btn btn-outline-primary w-100 text-start">
+                <i class="bi bi-cash-coin"></i> {{ _("Nova Venda") }}
+            </a>
+
+            <a href="{{ url_for('compras.nova_compra') }}" class="btn btn-outline-success w-100 text-start">
+                <i class="bi bi-cart-plus-fill"></i> {{ _("Nova Compra") }}
+            </a>
+
+            <a href="{{ url_for('compras.dashboard_compras') }}" class="btn btn-outline-success w-100 text-start">
+                <i class="bi bi-graph-up-arrow"></i> {{ _("Dashboard Compras") }}
+            </a>
+
+            <a href="{{ url_for('vendas.dashboard_vendas') }}" class="btn btn-outline-primary w-100 text-start">
+                <i class="bi bi-graph-up"></i> {{ _("Dashboard Vendas") }}
+            </a>
+
+            <a href="{{ url_for('pagamentos.novo_pagamento') }}" class="btn btn-outline-info w-100 text-start">
+                <i class="bi bi-wallet2"></i> {{ _("Novo Pagamento") }}
+            </a>
+        </div>
+    </div>
+
+    <!-- IDIOMAS -->
+    <div class="text-center mb-3">
+        <a href="{{ url_for('change_language', lang_code='pt') }}">🇵🇹 Português</a> |
+        <a href="{{ url_for('change_language', lang_code='en') }}">🇬🇧 English</a> |
+        <a href="{{ url_for('change_language', lang_code='fr') }}">🇫🇷 Français</a>
+    </div>
+
+    <!-- FLASH -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container mt-2">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} flash-message text-center shadow-sm">
+                {{ _(message) }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- CONTEÚDO -->
+    {% block content %}{% endblock %}
+</div>
+
+<!-- ================= JS ================= -->
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.flash-message')
+            .forEach(msg => msg.remove());
+    }, 2500);
+
+    function toggleActions() {
+        const box = document.getElementById('qa-box');
+        const arrow = document.getElementById('arrow-q');
+
+        if (box.style.display === "block") {
+            box.style.display = "none";
+            arrow.classList.remove("bi-chevron-up");
+            arrow.classList.add("bi-chevron-down");
+        } else {
+            box.style.display = "block";
+            arrow.classList.remove("bi-chevron-down");
+            arrow.classList.add("bi-chevron-up");
+        }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const content = document.querySelector('.content');
+        const icon = document.getElementById('toggle-icon');
+
+        sidebar.classList.toggle('collapsed');
+        content.classList.toggle('collapsed');
+
+        if (sidebar.classList.contains('collapsed')) {
+            icon.classList.remove('bi-chevron-left');
+            icon.classList.add('bi-chevron-right');
+        } else {
+            icon.classList.remove('bi-chevron-right');
+            icon.classList.add('bi-chevron-left');
+        }
+    }
+
+    function toggleSubmenu(id) {
+        const submenu = document.getElementById(id);
+        const arrow = document.getElementById(`arrow-${id.split('-')[0]}`);
+        submenu.style.display = submenu.style.display === "block" ? "none" : "block";
+        arrow.classList.toggle('submenu-open');
+    }
+</script>
+
+</body>
+</html>

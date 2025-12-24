@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Financeiro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">📊 Dashboard Financeiro</h2>
+        <span class="badge bg-secondary">Atualizado em {{ now().strftime('%d/%m/%Y %H:%M') }}</span>
+    </div>
+
+    <!-- Filtro por data -->
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-3">
+            <input type="date" name="data_inicio" class="form-control" value="{{ request.args.get('data_inicio', '') }}">
+        </div>
+        <div class="col-md-3">
+            <input type="date" name="data_fim" class="form-control" value="{{ request.args.get('data_fim', '') }}">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </form>
+
+    <!-- Cards Resumo -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-muted">Total Compras</h6>
+                        <i class="bi bi-cart-check text-success fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold text-success">{{ total_compras | round(2) }} MT</h3>
+                    <small class="text-muted">Valor acumulado</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-muted">Total Lucro</h6>
+                        <i class="bi bi-graph-up-arrow text-primary fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold text-primary">{{ total_lucro | round(2) }} MT</h3>
+                    <small class="text-muted">Desde o início</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-muted">Compras Hoje</h6>
+                        <i class="bi bi-calendar-event text-warning fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold">{{ compras_hoje | round(2) }} MT</h3>
+                    <small class="text-muted">Movimento diário</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-danger h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-muted">Lucro Hoje</h6>
+                        <i class="bi bi-cash-coin text-danger fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold text-danger">{{ lucro_hoje | round(2) }} MT</h3>
+                    <small class="text-muted">Resultado do dia</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico Evolução Financeira -->
+    <div class="card shadow-sm my-4">
+        <div class="card-header fw-bold">📈 Evolução Financeira (últimos 30 dias)</div>
+        <div class="card-body">
+            <canvas id="financeChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Botões de exportação -->
+    <div class="mb-3 d-flex justify-content-end gap-2">
+        <a href="{{ url_for('compras.exportar_pdf') }}" class="btn btn-danger btn-sm">📄 PDF</a>
+        <a href="{{ url_for('compras.exportar_excel') }}" class="btn btn-success btn-sm">📊 Excel</a>
+    </div>
+
+    <!-- Últimas Compras -->
+    <div class="card shadow-sm">
+        <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+            <span>🧾 Últimas Compras</span>
+            <a href="#" class="btn btn-sm btn-outline-primary">Ver todas</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Produto</th>
+                            <th class="text-center">Qtd</th>
+                            <th>Total</th>
+                            <th>Lucro</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in ultimas_compras %}
+                        <tr>
+                            <td class="fw-semibold">{{ c.produto }}</td>
+                            <td class="text-center">{{ c.quantidade }}</td>
+                            <td>{{ c.valor_total | round(2) }} MT</td>
+                            <td class="text-success fw-semibold">{{ c.lucro_total | round(2) }} MT</td>
+                            <td>{{ c.data_compra.strftime("%d/%m/%Y") }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                Nenhuma compra registada
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('financeChart').getContext('2d');
+const financeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels | safe }},
+        datasets: [
+            {
+                label: 'Compras (MT)',
+                data: {{ chart_compras | safe }},
+                borderColor: 'rgba(25, 135, 84, 1)',
+                backgroundColor: 'rgba(25, 135, 84, 0.2)',
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'Lucro (MT)',
+                data: {{ chart_lucro | safe }},
+                borderColor: 'rgba(13, 110, 253, 1)',
+                backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                tension: 0.4,
+                fill: true
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { position: 'top' },
+            tooltip: { mode: 'index', intersect: false }
+        },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+</script>
+{% endblock %}

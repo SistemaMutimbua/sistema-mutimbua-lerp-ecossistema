@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-3">{{ titulo_pagina }}</h3>
+
+    <!-- Alertas -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.titulo.label(class="form-label") }}
+            {{ form.titulo(class="form-control", placeholder="Digite o título") }}
+            {% for err in form.titulo.errors %}
+                <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.mensagem.label(class="form-label") }}
+            {{ form.mensagem(class="form-control", placeholder="Digite a mensagem", rows=3) }}
+            {% for err in form.mensagem.errors %}
+                <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.tipo.label(class="form-label") }}
+            {{ form.tipo(class="form-select") }}
+            {% for err in form.tipo.errors %}
+                <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-success">{{ _("Salvar") }}</button>
+        <a href="{{ url_for('notificacoes.lista_notificacoes') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

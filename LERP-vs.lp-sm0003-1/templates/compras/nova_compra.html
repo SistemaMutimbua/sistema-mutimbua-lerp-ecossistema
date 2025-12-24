@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white;">
+
+  <h3 class="fw-bold mb-4 text-center">🛒 {{ _("Nova Venda") }}</h3>
+
+  <form method="POST" class="row g-3">
+    {{ form.hidden_tag() }}
+
+    <div class="col-md-6 position-relative">
+      <label class="form-label">{{ _("Produto") }}</label>
+      <input type="text" name="codigo_produto" class="form-control" id="produtoInput" placeholder="{{ _('Digite o nome ou código') }}" required autocomplete="off">
+      <div id="autocompleteList" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">{{ _("Quantidade") }}</label>
+      <input type="number" name="quantidade" class="form-control" step="0.01" min="0.01" required>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">{{ _("Preço Venda (MT)") }}</label>
+      <input type="number" name="preco_venda" class="form-control" step="0.01" min="0.01" id="precoVendaInput" readonly>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">{{ _("Categoria") }}</label>
+      <input type="text" name="categoria" class="form-control" id="categoriaInput" readonly>
+    </div>
+
+    <div class="col-12 d-flex justify-content-end mt-3">
+      <a href="{{ url_for('vendas.lista_vendas') }}" class="btn btn-secondary me-2">{{ _("Cancelar") }}</a>
+      <button type="submit" class="btn btn-success">{{ _("Registrar Venda") }}</button>
+    </div>
+  </form>
+
+  <hr class="my-4">
+
+  <!-- Carrinho -->
+  <h5 class="fw-bold">{{ _("Itens no carrinho") }}</h5>
+  <table class="table table-dark table-striped mt-2">
+    <thead>
+      <tr>
+        <th>{{ _("Produto") }}</th>
+        <th>{{ _("Quantidade") }}</th>
+        <th>{{ _("Preço Venda") }}</th>
+        <th>{{ _("Total") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens %}
+        <tr>
+          <td>{{ item.produto.nome }}</td>
+          <td>{{ item.quantidade }}</td>
+          <td>{{ "%.2f"|format(item.produto.preco_venda or 0) }} MT</td>
+          <td>{{ "%.2f"|format(item.total) }} MT</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+<script>
+  const produtos = {{ produtos|tojson }};
+  const produtoInput = document.getElementById('produtoInput');
+  const autocompleteList = document.getElementById('autocompleteList');
+  const categoriaInput = document.getElementById('categoriaInput');
+  const precoVendaInput = document.getElementById('precoVendaInput');
+
+  produtoInput.addEventListener('input', function() {
+    const val = this.value.toLowerCase();
+    autocompleteList.innerHTML = '';
+    if (!val) return;
+
+    const matches = produtos.filter(p => 
+      p.nome.toLowerCase().includes(val) || 
+      p.codigo.toLowerCase().includes(val)
+    ).slice(0, 5); // limitar sugestões
+
+    matches.forEach(p => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.classList.add('list-group-item', 'list-group-item-action');
+      item.textContent = `${p.nome} - ${p.codigo}`;
+      item.addEventListener('click', () => {
+        produtoInput.value = p.codigo;
+        categoriaInput.value = p.categoria;
+        precoVendaInput.value = p.preco_venda.toFixed(2);
+        autocompleteList.innerHTML = '';
+      });
+      autocompleteList.appendChild(item);
+    });
+  });
+
+  // Fechar autocomplete ao clicar fora
+  document.addEventListener('click', function(e) {
+    if (!produtoInput.contains(e.target) && !autocompleteList.contains(e.target)) {
+      autocompleteList.innerHTML = '';
+    }
+  });
+</script>
+
+{% endblock %}

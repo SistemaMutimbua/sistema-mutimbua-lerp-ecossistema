@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white; max-width: 600px;">
+    <h3 class="fw-bold mb-4">💰 {{ _("Novo Pagamento") }}</h3>
+
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <!-- Código do pagamento (readonly) -->
+        <div class="mb-3">
+            {{ form.codigo_pagamento.label(class="form-label") }}
+            {{ form.codigo_pagamento(class="form-control", readonly=True) }}
+        </div>
+
+        <!-- Valor a pagar (readonly) -->
+        <div class="mb-3">
+            {{ form.preco_unitario.label(class="form-label") }}
+            {{ form.preco_unitario(class="form-control", readonly=True) }}
+        </div>
+
+        <!-- Tipo de pagamento -->
+        <div class="mb-3">
+            {{ form.tipo_pagamento.label(class="form-label") }}
+            {{ form.tipo_pagamento(class="form-select") }}
+            {% for err in form.tipo_pagamento.errors %}
+                <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Observação / descrição -->
+        <div class="mb-3">
+            {{ form.descricao.label(class="form-label") }}
+            {{ form.descricao(class="form-control", placeholder=_("Observação / referência")) }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ _("Registrar Pagamento") }}</button>
+        <a href="{{ url_for('pagamentos.lista_pagamentos') }}" class="btn btn-secondary">{{ _("Cancelar") }}</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Listar Cotações{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">📄 Cotações</h2>
+        <!-- Botão Nova Cotação -->
+        <a href="{{ url_for('cotacoes.nova_cotacao') }}" class="btn btn-success">
+            ➕ Nova Cotação
+        </a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Total (MZN)</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cotacao in cotacoes %}
+            <tr>
+                <!-- ID -->
+                <td>{{ cotacao.id }}</td>
+
+                <!-- Cliente -->
+                <td>{{ cotacao.cliente }}</td>
+
+                <!-- Data -->
+                <td>{{ cotacao.data_cotacao.strftime('%d/%m/%Y') if cotacao.data_cotacao else '-' }}</td>
+
+                <!-- Total -->
+                <td>{{ cotacao.total_valor | round(2) }}</td>
+
+                <!-- Status -->
+                <td>{{ cotacao.status }}</td>
+
+                <!-- Ações -->
+                <td>
+                    <!-- Botão PDF -->
+                    <a href="{{ url_for('cotacoes.gerar_pdf', cotacao_id=cotacao.id) }}" 
+                       class="btn btn-sm btn-secondary" title="Gerar PDF">
+                        PDF
+                    </a>
+
+                    <!-- Botão Excel -->
+                    <a href="{{ url_for('cotacoes.gerar_excel', cotacao_id=cotacao.id) }}" 
+                       class="btn btn-sm btn-success" title="Exportar Excel">
+                        Excel
+                    </a>
+
+                    <!-- Botão Transformar em Venda -->
+                    <a href="{{ url_for('vendas.criar_venda_a_partir_cotacao', cotacao_id=cotacao.id) }}" 
+                       class="btn btn-sm btn-warning" title="Transformar em Venda">
+                        🛒 Venda
+                    </a>
+
+                    <!-- Botão Editar -->
+                    <a href="{{ url_for('cotacoes.editar_cotacao', cotacao_id=cotacao.id) }}" 
+                       class="btn btn-sm btn-primary" title="Editar">
+                        ✏️
+                    </a>
+
+                    <!-- Botão Excluir -->
+                    <a href="{{ url_for('cotacoes.excluir_cotacao', cotacao_id=cotacao.id) }}" 
+                       class="btn btn-sm btn-danger" title="Excluir">
+                        🗑️
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Linha padrão estilo Dove */
+.linha-dove {
+    background-color: #e8e8e3 !important;
+    border-bottom: 1px dashed #a9a9a9 !important;
+}
+.linha-dove:nth-child(even) {
+    background-color: #f3f3ef !important;
+}
+.linha-dove:hover {
+    background-color: #dddcd6 !important;
+    cursor: pointer;
+}
+
+/* Cabeçalho estilo LERP Premium */
+.tabela-lerp thead {
+    background-color: #10214b !important;
+    color: white !important;
+    text-transform: uppercase;
+}
+
+/* Bordas tabela estilo Excel */
+.tabela-lerp {
+    border: 1px solid #c5c5c5 !important;
+}
+.tabela-lerp td, .tabela-lerp th {
+    border: 1px dashed #bcbcbc !important;
+}
+
+/* Scroll fixo para altura da tabela */
+.tabela-scroll {
+    max-height: 350px;
+    overflow-y: auto;
+}
+</style>
+
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white;">
+
+    <h3 class="fw-bold mb-4">💵 {{ _("Caixa") }}</h3>
+
+    <!-- Botões de período e nova saída -->
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <a href="{{ url_for('caixa.lista_caixa', periodo='hoje') }}" class="btn btn-light btn-sm fw-bold">{{ _("Hoje") }}</a>
+        <a href="{{ url_for('caixa.lista_caixa', periodo='semana') }}" class="btn btn-light btn-sm fw-bold">{{ _("Semana") }}</a>
+        <a href="{{ url_for('caixa.lista_caixa', periodo='mes') }}" class="btn btn-light btn-sm fw-bold">{{ _("Mês") }}</a>
+        <a href="{{ url_for('caixa.lista_caixa', periodo='ano') }}" class="btn btn-light btn-sm fw-bold">{{ _("Ano") }}</a>
+        <a href="{{ url_for('caixa.nova_saida') }}" class="btn btn-danger btn-sm fw-bold ms-auto">{{ _("Nova Saída") }}</a>
+    </div>
+
+    <!-- Resumo Caixa -->
+    <div class="row mt-3 g-3">
+        <div class="col-md-4">
+            <div class="alert alert-success mb-0 text-center">
+                <strong>{{ _("Entradas") }}:</strong> {{ "%.2f"|format(entradas) }} MT
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="alert alert-danger mb-0 text-center">
+                <strong>{{ _("Saídas") }}:</strong> {{ "%.2f"|format(saidas) }} MT
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="alert alert-info mb-0 text-center">
+                <strong>{{ _("Saldo") }}:</strong> {{ "%.2f"|format(saldo) }} MT
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Saídas -->
+    <h5 class="mt-4 fw-bold">{{ _("Saídas") }}</h5>
+    <div class="tabela-scroll">
+        <table class="table table-hover table-bordered tabela-lerp">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>{{ _("Valor (MT)") }}</th>
+                    <th>{{ _("Justificativa") }}</th>
+                    <th>{{ _("Data") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in lista_saidas %}
+                <tr class="linha-dove">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ "%.2f"|format(s.valor) }}</td>
+                    <td>{{ s.justificativa }}</td>
+                    <td>{{ s.data.strftime("%d/%m/%Y %H:%M") }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">{{ _("Nenhuma saída registrada.") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

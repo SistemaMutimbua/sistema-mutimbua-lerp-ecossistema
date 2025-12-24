@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Detalhes - Produto Avulso{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Detalhes - {{ produto.descricao }}</h1>
+    <a href="{{ url_for('produtos_avulsos.listar_produtos') }}" class="btn btn-secondary mb-3">Voltar</a>
+
+    <h3>Informações do Produto</h3>
+    <ul class="list-group mb-4">
+        <li class="list-group-item"><strong>Código:</strong> {{ produto.codigo }}</li>
+        <li class="list-group-item"><strong>Descrição:</strong> {{ produto.descricao }}</li>
+        <li class="list-group-item"><strong>Preço:</strong> {{ produto.preco | round(2) }}</li>
+        <li class="list-group-item"><strong>Total Vendido:</strong> {{ produto.total_vendido | round(2) }}</li>
+        <li class="list-group-item"><strong>Unidade:</strong> {{ produto.unidade }}</li>
+    </ul>
+
+    <h3>Entradas</h3>
+    <table class="table table-striped mb-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Quantidade</th>
+                <th>Custo Unitário</th>
+                <th>Custo Total</th>
+                <th>Fornecedor</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entrada in entradas %}
+            <tr>
+                <td>{{ entrada.quantidade }}</td>
+                <td>{{ entrada.custo_unitario | round(2) }}</td>
+                <td>{{ entrada.custo_total | round(2) }}</td>
+                <td>{{ entrada.fornecedor }}</td>
+                <td>{{ entrada.data_entrada.strftime('%d/%m/%Y %H:%M') }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center">Nenhuma entrada registrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Vendas</h3>
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Valor Total</th>
+                <th>Método Pagamento</th>
+                <th>Cliente</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venda in vendas %}
+            <tr>
+                <td>{{ venda.quantidade }}</td>
+                <td>{{ venda.valor_unitario | round(2) }}</td>
+                <td>{{ venda.valor_total | round(2) }}</td>
+                <td>{{ venda.metodo_pagamento }}</td>
+                <td>{{ venda.cliente }}</td>
+                <td>{{ venda.data_venda.strftime('%d/%m/%Y %H:%M') }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center">Nenhuma venda registrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

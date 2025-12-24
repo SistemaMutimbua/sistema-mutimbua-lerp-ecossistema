@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white;">
+    <h3 class="fw-bold mb-4">💰 {{ _("Novo Pagamento") }}</h3>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <!-- Código do Pagamento -->
+        <div class="mb-3">
+            {{ form.codigo_pagamento.label(class="form-label") }}
+            {{ form.codigo_pagamento(class="form-control") }}
+        </div>
+
+        <!-- Valor do Pagamento -->
+        <div class="mb-3">
+            {{ form.preco_unitario.label(class="form-label") }}
+            {{ form.preco_unitario(class="form-control") }}
+        </div>
+
+        <!-- Tipo de Pagamento -->
+        <div class="mb-3">
+            {{ form.tipo_pagamento.label(class="form-label") }}
+            {{ form.tipo_pagamento(class="form-select") }}
+        </div>
+
+        <!-- Descrição -->
+        <div class="mb-3">
+            {{ form.descricao.label(class="form-label") }}
+            {{ form.descricao(class="form-control", rows="3") }}
+        </div>
+
+        <!-- Botões -->
+        <button type="submit" class="btn btn-success fw-bold">{{ _("Registrar Pagamento") }}</button>
+        <a href="{{ url_for('pagamentos.lista_pagamentos') }}" class="btn btn-light fw-bold">{{ _("Cancelar") }}</a>
+    </form>
+</div>
+
+{% endblock %}

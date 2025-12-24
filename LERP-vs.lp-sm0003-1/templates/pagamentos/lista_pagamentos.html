@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white;">
+
+    <h3 class="fw-bold mb-4">💰 {{ _("Lista de Pagamentos") }}</h3>
+
+    <!-- Filtros e botões -->
+    <form method="GET" class="row mb-3 g-2">
+        <div class="col-md-3">
+            <input type="text" name="filtro" class="form-control" placeholder="{{ _('Buscar por código...') }}"
+                   value="{{ request.args.get('filtro', '') }}">
+        </div>
+        <div class="col-md-3">
+            <select name="tipo" class="form-select">
+                <option value="">{{ _("Todos os Tipos") }}</option>
+                <option value="mpesa" {% if request.args.get('tipo')=='mpesa' %}selected{% endif %}>{{ _("Mpesa") }}</option>
+                <option value="emola" {% if request.args.get('tipo')=='emola' %}selected{% endif %}>{{ _("Emola") }}</option>
+                <option value="cash" {% if request.args.get('tipo')=='cash' %}selected{% endif %}>{{ _("Cash") }}</option>
+                <option value="pos" {% if request.args.get('tipo')=='pos' %}selected{% endif %}>{{ _("POS") }}</option>
+                <option value="banco" {% if request.args.get('tipo')=='banco' %}selected{% endif %}>{{ _("Banco") }}</option>
+            </select>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('pagamentos.exportar_excel') }}" class="btn btn-light btn-sm fw-bold me-2">
+                📊 {{ _("Exportar Excel") }}
+            </a>
+            <a href="{{ url_for('pagamentos.exportar_pdf_caixa') }}" class="btn btn-light btn-sm fw-bold me-2">
+                📑 {{ _("Folha de Caixa PDF") }}
+            </a>
+        </div>
+    </form>
+
+    <!-- Tabela de pagamentos -->
+    <div class="table-responsive tabela-scroll">
+        <table class="table table-hover table-bordered tabela-lerp">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>#</th>
+                    <th>{{ _("Código Pagamento") }}</th>
+                    <th>{{ _("Produtos") }}</th>
+                    <th>{{ _("Valor (MT)") }}</th>
+                    <th>{{ _("Tipo de Pagamento") }}</th>
+                    <th>{{ _("Data") }}</th>
+                    <th>{{ _("Recibo") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pagamentos %}
+                <tr class="linha-dove">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ p.codigo_pagamento }}</td>
+                    <td>{{ p.produtos or "" }}</td>
+                    <td>{{ "%.2f"|format(p.valor or 0) }}</td>
+                    <td>
+                        {% if p.tipo_pagamento %}
+                        <span class="badge bg-success">{{ p.tipo_pagamento }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ p.data_pagamento.strftime("%d/%m/%Y %H:%M") if p.data_pagamento else "" }}</td>
+                    <td>
+                        <a href="{{ url_for('pagamentos.gerar_recibo', pagamento_id=p.id) }}" 
+                           target="_blank" class="btn btn-sm btn-danger fw-bold">
+                           {{ _("Recibo") }}
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">{{ _("Nenhum pagamento encontrado.") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Total Geral -->
+    <div class="alert alert-light mt-3 d-flex justify-content-between align-items-center fw-bold">
+        <span>{{ _("Total Pago:") }}</span>
+        <span>{{ "%.2f"|format(total_pago) }} MT</span>
+    </div>
+</div>
+
+<style>
+/* Linha padrão estilo Dove */
+.linha-dove {
+    background-color: #e8e8e3 !important;
+    border-bottom: 1px dashed #a9a9a9 !important;
+}
+.linha-dove:nth-child(even) { background-color: #f3f3ef !important; }
+.linha-dove:hover { background-color: #dddcd6 !important; cursor: pointer; }
+
+/* Bordas tabela estilo Excel */
+.tabela-lerp { border: 1px solid #c5c5c5 !important; }
+.tabela-lerp td, .tabela-lerp th { border: 1px dashed #bcbcbc !important; }
+
+/* Scroll fixo */
+.tabela-scroll { max-height: 400px; overflow-y: auto; }
+
+/* Cabeçalho fixo */
+.sticky-top th {
+    position: sticky; top: 0; background-color: #132a63 !important; color: white !important; z-index: 2;
+}
+
+/* Badge tipo pagamento */
+.badge { font-size: 0.85rem; padding: 0.25em 0.5em; }
+</style>
+
+{% endblock %}

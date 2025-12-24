@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="text-primary">📊 Histórico de Vendas</h3>
+  <a href="{{ url_for('vendas.nova_venda') }}" class="btn btn-success btn-sm">+ Nova Venda</a>
+
+  <table class="table table-striped mt-3">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Preço Unitário</th>
+        <th>Quantidade</th>
+        <th>Valor Total</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in vendas %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ v.codigo_produto }}</td>
+        <td>{{ v.produto }}</td>
+        <td>{{ "%.2f"|format(v.preco_unitario) }} MT</td>
+        <td>{{ v.quantidade }}</td>
+        <td>{{ "%.2f"|format(v.valor_total) }} MT</td>
+        <td>{{ v.data.strftime("%d/%m/%Y %H:%M") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="text-end mt-3">
+    <h5>💰 Total Geral: <b>{{ "%.2f"|format(total_geral) }} MT</b></h5>
+  </div>
+</div>
+{% endblock %}

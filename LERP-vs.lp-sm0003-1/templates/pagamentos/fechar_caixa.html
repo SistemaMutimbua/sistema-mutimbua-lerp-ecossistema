@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white;">
+    <h3 class="fw-bold mb-4">💰 {{ _("Fechar Caixa") }}</h3>
+
+    <form method="POST" class="row g-2 mb-3">
+        <div class="col-md-3">
+            <label>{{ _("Data Inicial") }}</label>
+            <input type="date" name="data_inicio" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label>{{ _("Data Final") }}</label>
+            <input type="date" name="data_fim" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label>{{ _("Tipo de Pagamento") }}</label>
+            <select name="tipo" class="form-select">
+                <option value="">{{ _("Todos") }}</option>
+                <option value="cash">Cash</option>
+                <option value="mpesa">Mpesa</option>
+                <option value="emola">Emola</option>
+                <option value="pos">POS</option>
+                <option value="transferencia">Transferência</option>
+                <option value="cheque">Cheque</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-success me-2">{{ _("Fechar Caixa") }}</button>
+            <a href="{{ url_for('pagamentos.exportar_excel_caixa') }}" class="btn btn-success me-2">{{ _("Exportar Excel") }}</a>
+            <a href="{{ url_for('pagamentos.exportar_pdf_caixa') }}" class="btn btn-danger">{{ _("Exportar PDF") }}</a>
+        </div>
+    </form>
+
+    <table class="table table-hover table-bordered tabela-lerp">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>{{ _("Data") }}</th>
+                <th>{{ _("Total Entrada (MT)") }}</th>
+                <th>{{ _("Total Saída (MT)") }}</th>
+                <th>{{ _("Detalhes") }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in pagamentos %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ f.data.strftime("%d/%m/%Y") }}</td>
+                <td>{{ "%.2f"|format(f.total_entrada) }}</td>
+                <td>{{ "%.2f"|format(f.total_saida) }}</td>
+                <td>{{ f.detalhes }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">{{ _("Nenhuma folha de caixa encontrada.") }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

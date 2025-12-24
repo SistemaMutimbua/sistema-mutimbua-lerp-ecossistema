@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color: #c7d4ee; border:1px solid #8fa7d1;">
+    <h3 class="mb-3" style="color:#0d1b2a; font-weight:bold;">
+        {{ _("Lista de Produtos Avulsos") }}
+    </h3>
+
+    <a href="{{ url_for('produtos_avulsos.cadastrar_produto') }}" class="btn btn-success mb-3 px-4">
+        <i class="bi bi-plus-circle"></i> {{ _("Novo Produto") }}
+    </a>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-primary">
+            <tr>
+                <th>{{ _("ID") }}</th>
+                <th>{{ _("Código") }}</th>
+                <th>{{ _("Descrição") }}</th>
+                <th>{{ _("Preço (MT)") }}</th>
+                <th>{{ _("Unidade") }}</th>
+                <th>{{ _("Ações") }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr>
+                <td>{{ produto.id }}</td>
+                <td>{{ produto.codigo }}</td>
+                <td>{{ produto.descricao }}</td>
+                <td>{{ "%.2f"|format(produto.preco) }}</td>
+                <td>{{ produto.unidade }}</td>
+                <td>
+                    <a href="{{ url_for('produtos_avulsos.editar_produto', id=produto.id) }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-pencil-square"></i> {{ _("Editar") }}
+                    </a>
+
+                    <a href="{{ url_for('produtos_avulsos.apagar_produto', id=produto.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('{{ _('Tem certeza que deseja apagar este produto?') }}');">
+                        <i class="bi bi-trash"></i> {{ _("Apagar") }}
+                    </a>
+
+                    <a href="{{ url_for('produtos_avulsos.registrar_entrada', produto_id=produto.id) }}" class="btn btn-sm btn-success">
+                        <i class="bi bi-arrow-down-circle"></i> {{ _("Registrar Entrada") }}
+                    </a>
+
+                    <a href="{{ url_for('produtos_avulsos.vender', produto_id=produto.id) }}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-cart-plus"></i> {{ _("Vender") }}
+                    </a>
+
+                    <a href="{{ url_for('produtos_avulsos.detalhes_financeiros', produto_id=produto.id) }}" class="btn btn-sm btn-info">
+                        <i class="bi bi-info-circle"></i> {{ _("Detalhes") }}
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">{{ _("Nenhum produto cadastrado.") }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

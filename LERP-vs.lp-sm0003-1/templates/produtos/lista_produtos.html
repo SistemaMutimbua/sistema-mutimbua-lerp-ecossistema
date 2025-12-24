@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  /* Fundo Dove padrão */
+  .linha-dove {
+    background-color: #e8e8e3 !important;
+    border-bottom: 1px dashed #a9a9a9 !important;
+  }
+
+  /* Linhas alternadas suaves */
+  .linha-dove:nth-child(even) {
+    background-color: #f3f3ef !important;
+  }
+
+  /* Efeito hover estilo Excel moderno */
+  .linha-dove:hover,
+  .linha-alerta:hover {
+    background-color: #dddcd6 !important;
+    cursor: pointer;
+  }
+
+  /* Cabeçalho estilo LERP Premium */
+  .tabela-lerp thead {
+    background-color: #10214b !important;
+    color: white !important;
+    text-transform: uppercase;
+  }
+
+  /* Suavização de bordas ao estilo Excel */
+  .tabela-lerp {
+    border: 1px solid #c5c5c5 !important;
+  }
+  .tabela-lerp td, .tabela-lerp th {
+    border: 1px dashed #bcbcbc !important;
+  }
+
+  /* Linha de alerta */
+  .linha-alerta {
+    background-color: #f8d7da !important;
+    border-bottom: 1px dashed #b25c5c !important;
+  }
+</style>
+
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white;">
+  <h3 class="fw-bold" style="color: #ffffff;">📦 {{ _("Lista de Produtos") }}</h3>
+
+  <!-- Botões -->
+  <a href="{{ url_for('produtos.novo_produto') }}" class="btn btn-light btn-sm fw-bold">+ {{ _("Novo Produto") }}</a>
+  <a href="{{ url_for('produtos.exportar_excel') }}" class="btn btn-danger btn-sm fw-bold">{{ _("Exportar Excel") }}</a>
+  <a href="{{ url_for('produtos.exportar_pdf') }}" class="btn btn-danger btn-sm fw-bold">{{ _("Exportar PDF") }}</a>
+
+  <!-- Filtro -->
+  <form method="get" class="mt-3 mb-3 d-flex">
+    <select name="campo" class="form-select w-25 me-2">
+      <option value="nome">{{ _("Nome") }}</option>
+      <option value="codigo">{{ _("Código") }}</option>
+      <option value="categoria">{{ _("Categoria") }}</option>
+    </select>
+    <input type="text" name="filtro" class="form-control w-50 me-2" placeholder="{{ _('Pesquisar...') }}">
+    <button type="submit" class="btn btn-dark fw-bold">{{ _("Filtrar") }}</button>
+  </form>
+
+  <!-- Tabela -->
+  <table class="table table-hover table-bordered tabela-lerp">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{{ _("Código") }}</th>
+        <th>{{ _("Produto") }}</th>
+        <th>{{ _("Categoria") }}</th>
+        <th>{{ _("Preço Unitário") }}</th>
+        <th>{{ _("Stock") }}</th>
+        <th>{{ _("Estado") }}</th>
+        <th>{{ _("Ações") }}</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for p in produtos %}
+      <tr class="
+          {% if p.estado == 'Alerta' %}
+            linha-alerta
+          {% else %}
+            linha-dove
+          {% endif %}
+        ">
+        <td class="fw-bold">{{ loop.index }}</td>
+        <td>{{ p.codigo }}</td>
+        <td>{{ p.nome }}</td>
+        <td>{{ p.categoria }}</td>
+        <td>{{ "%.2f"|format(p.preco_unitario) }} MT</td>
+        <td>{{ p.stock }}</td>
+        <td>
+          {% if p.estado == 'Alerta' %}
+            <span class="badge bg-danger">⚠ {{ _("Abaixo do Stock") }}</span>
+          {% else %}
+            <span class="badge bg-success">{{ _("Normal") }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('produtos.deletar_produto', id=p.id) }}"
+             class="btn btn-danger btn-sm fw-bold"
+             onclick="return confirm('{{ _("Tem certeza que deseja excluir este produto?") }}')">
+             🗑
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

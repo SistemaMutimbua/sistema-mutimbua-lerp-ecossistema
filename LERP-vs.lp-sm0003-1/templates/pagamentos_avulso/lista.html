@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Pagamentos de Produtos Avulsos</h3>
+        <a href="{{ url_for('produtos_avulsos.listar_produtos') }}" class="btn btn-secondary">
+            Voltar
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+
+            {% if pagamentos %}
+            <table class="table table-striped mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Produto</th>
+                        <th>Cliente</th>
+                        <th>Quantidade</th>
+                        <th>Valor Unitário (MT)</th>
+                        <th>Valor Total (MT)</th>
+                        <th>Método</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pagamentos %}
+                    <tr>
+                        <td>{{ p.id }}</td>
+                        <td>{{ p.produto.descricao }}</td>
+                        <td>{{ p.cliente }}</td>
+                        <td>{{ p.quantidade }}</td>
+                        <td>{{ "%.2f"|format(p.valor_unitario) }}</td>
+                        <td class="fw-bold">{{ "%.2f"|format(p.valor_total) }}</td>
+                        <td>{{ p.metodo_pagamento|capitalize }}</td>
+                        <td>{{ p.data_pagamento.strftime("%d/%m/%Y %H:%M") }}</td>
+                        <td>
+                            <a href="{{ url_for('produtos_avulsos.gerar_recibo_avulso', pagamento_id=p.id) }}"
+                               class="btn btn-sm btn-primary">
+                                Recibo
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <h5>Nenhum pagamento registrado ainda.</h5>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

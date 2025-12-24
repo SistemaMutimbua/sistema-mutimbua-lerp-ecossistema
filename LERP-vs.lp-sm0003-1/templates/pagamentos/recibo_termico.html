@@ -1,0 +1,103 @@
+<!-- templates/pagamentos/recibo_termico.html -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Recibo Térmico - Venda {{ venda.id }}</title>
+    <style>
+        body {
+            font-family: monospace;
+            font-size: 12px;
+            width: 80mm; /* tamanho típico de recibo térmico */
+            margin: 0;
+            padding: 5px;
+        }
+        h2, h3 {
+            text-align: center;
+            margin: 5px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        th, td {
+            text-align: left;
+        }
+        .total {
+            font-weight: bold;
+            border-top: 1px dashed #000;
+        }
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📄 Recibo de Pagamento</h2>
+<h3>Venda #{{ venda.id }}</h3>
+<p class="center">{{ data.strftime("%d/%m/%Y %H:%M:%S") }}</p>
+<hr>
+
+<!-- Itens da venda -->
+<table>
+    <thead>
+        <tr>
+            <th>Produto</th>
+            <th>Qtd</th>
+            <th>Preço</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in itens %}
+        <tr>
+            <td>{{ item.produto }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>{{ "%.2f"|format(item.preco_unitario) }} MT</td>
+            <td>{{ "%.2f"|format(item.preco_unitario * item.quantidade) }} MT</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<!-- Totais -->
+<p><strong>Total da Venda:</strong> {{ "%.2f"|format(total_venda) }} MT</p>
+<p><strong>Total Pago:</strong> {{ "%.2f"|format(total_pago) }} MT</p>
+<p><strong>Saldo Restante:</strong> {{ "%.2f"|format(saldo_restante) }} MT</p>
+
+<hr>
+
+<!-- Pagamentos realizados -->
+<h3>Pagamentos</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Valor</th>
+            <th>Tipo</th>
+            <th>Referência</th>
+            <th>Data</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in pagamentos %}
+        <tr>
+            <td>{{ p.codigo_pagamento }}</td>
+            <td>{{ "%.2f"|format(p.valor) }} MT</td>
+            <td>{{ p.tipo_pagamento }}</td>
+            <td>{{ p.referencia or "-" }}</td>
+            <td>{{ p.data_pagamento.strftime("%d/%m/%Y %H:%M:%S") }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+<p class="center">Obrigado pela preferência!</p>
+
+</body>
+</html>

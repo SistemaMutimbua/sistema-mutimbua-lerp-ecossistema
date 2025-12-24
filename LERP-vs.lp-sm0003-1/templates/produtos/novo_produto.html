@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 p-4 rounded"
+     style="background-color: #c7d4ee; border: 1px solid #8fa7d1;">
+    
+    <h3 class="mb-3" style="color:#0d1b2a; font-weight: bold;">
+        {{ _("Cadastrar Novo Produto") }}
+    </h3>
+
+    <form method="POST">
+
+        <!-- Nome -->
+        <div class="mb-3">
+            <label for="nome" class="form-label" style="color:#0d1b2a;">
+                {{ _("Nome do Produto") }}
+            </label>
+            <input type="text" class="form-control" id="nome" name="nome" required 
+                   placeholder="{{ _('Digite o nome do produto') }}">
+        </div>
+
+        <!-- Categoria -->
+        <div class="mb-3">
+            <label for="categoria" class="form-label" style="color:#0d1b2a;">
+                {{ _("Categoria") }}
+            </label>
+            <select class="form-select" id="categoria" name="categoria" required>
+                <option value="" selected disabled>{{ _("Selecione a categoria") }}</option>
+                <option value="Botle Store">{{ _("Botle Store") }}</option>
+                <option value="Mercearia">{{ _("Mercearia") }}</option>
+                <option value="Loja">{{ _("Loja") }}</option>
+                <option value="Supermercado">{{ _("Supermercado") }}</option>
+                <option value="Farmacia">{{ _("Farmácia") }}</option>
+                <option value="Restaurantes">{{ _("Restaurantes") }}</option>
+                <option value="Bar">{{ _("Bar") }}</option>
+                <option value="Ferragem">{{ _("Ferragem") }}</option>
+                <option value="Acessorios">{{ _("Acessórios") }}</option>
+                <option value="Servicos">{{ _("Serviços") }}</option>
+            </select>
+        </div>
+
+        <!-- Preço Unitário -->
+        <div class="mb-3">
+            <label for="preco_unitario" class="form-label" style="color:#0d1b2a;">
+                {{ _("Preço Unitário (MT)") }}
+            </label>
+            <input type="number" step="0.01" class="form-control" id="preco_unitario" 
+                   name="preco_unitario" required placeholder="{{ _('Digite o preço unitário') }}">
+        </div>
+
+        <!-- Stock -->
+        <div class="mb-3">
+            <label for="stock" class="form-label" style="color:#0d1b2a;">
+                {{ _("Quantidade em Stock") }}
+            </label>
+            <input type="number" class="form-control" id="stock" name="stock" required 
+                   placeholder="{{ _('Digite a quantidade em stock') }}">
+        </div>
+
+        <!-- Botões -->
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('produtos.lista_produtos') }}" 
+               class="btn btn-secondary" style="background:#6c757d;">
+                {{ _("Voltar") }}
+            </a>
+
+            <button type="submit" class="btn"
+                    style="background-color:#0d1b2a; color:white;">
+                {{ _("Salvar Produto") }}
+            </button>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

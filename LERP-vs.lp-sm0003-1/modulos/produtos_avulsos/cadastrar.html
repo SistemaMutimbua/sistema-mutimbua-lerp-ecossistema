@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Cadastrar Produto Avulso{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Cadastrar Produto Avulso</h1>
+    <a href="{{ url_for('produtos_avulsos.listar_produtos') }}" class="btn btn-secondary mb-3">Voltar</a>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.codigo.label(class="form-label") }}
+            {{ form.codigo(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.descricao.label(class="form-label") }}
+            {{ form.descricao(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.preco.label(class="form-label") }}
+            {{ form.preco(class="form-control", step="0.01") }}
+        </div>
+        <div class="mb-3">
+            {{ form.unidade.label(class="form-label") }}
+            {{ form.unidade(class="form-control") }}
+        </div>
+        <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
+    </form>
+</div>
+{% endblock %}

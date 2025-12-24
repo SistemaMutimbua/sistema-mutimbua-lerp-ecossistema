@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ======= Estilos ======= -->
+<style>
+/* Linha estilo Dove */
+.linha-dove { background-color: #e8e8e3; border-bottom: 1px dashed #a9a9a9; }
+.linha-dove:nth-child(even) { background-color: #f3f3ef; }
+.linha-dove:hover { background-color: #dddcd6; cursor: pointer; }
+
+/* Cabeçalho tabela */
+.tabela-lerp thead { background-color: #10214b; color: white; text-transform: uppercase; }
+.tabela-lerp { border: 1px solid #c3c3c3; }
+.tabela-lerp td, .tabela-lerp th { border: 1px dashed #bcbcbc; }
+
+/* Scroll fixo */
+.tabela-scroll { max-height: 300px; overflow-y: auto; }
+</style>
+
+<div class="container mt-4 p-4 rounded" style="background-color:#132a63; color:white;">
+
+  <h3 class="fw-bold mb-4 text-center">🛒 {{ _('Nova Venda') }}</h3>
+
+  <!-- ======= Formulário de adicionar produtos ======= -->
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="row g-2 mb-3">
+      <div class="col-md-4">
+        {{ form.produto.label(class="form-label") }}
+        {{ form.produto(class="form-control", id="produto_nome") }}
+      </div>
+      <div class="col-md-2">
+        {{ form.codigo_produto.label(class="form-label") }}
+        {{ form.codigo_produto(class="form-control", id="codigo_produto") }}
+      </div>
+      <div class="col-md-2">
+        {{ form.quantidade.label(class="form-label") }}
+        {{ form.quantidade(class="form-control") }}
+      </div>
+      <div class="col-md-2 align-self-end">
+        <button type="submit" class="btn btn-success fw-bold w-100">➕ {{ _('Adicionar') }}</button>
+      </div>
+    </div>
+  </form>
+
+  {% if carrinho %}
+  <!-- ======= Tabela do carrinho ======= -->
+  <div class="tabela-scroll mb-3">
+    <table class="table table-hover table-bordered tabela-lerp">
+      <thead>
+        <tr>
+          <th>{{ _('Código') }}</th>
+          <th>{{ _('Produto') }}</th>
+          <th>{{ _('Quantidade') }}</th>
+          <th>{{ _('Preço Unitário (MT)') }}</th>
+          <th>{{ _('Valor Total (MT)') }}</th>
+          <th>{{ _('Lucro Total (MT)') }}</th>
+          <th>{{ _('Ação') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in carrinho %}
+        <tr class="linha-dove">
+          <td>{{ item.codigo }}</td>
+          <td>{{ item.produto }}</td>
+          <td>{{ item.quantidade }}</td>
+          <td>{{ "%.2f"|format(item.preco_unitario) }}</td>
+          <td class="fw-bold text-primary text-end valor_total">{{ "%.2f"|format(item.valor_total) }}</td>
+          <td class="fw-bold text-success text-end lucro_total">{{ "%.2f"|format(item.lucro_total) }}</td>
+          <td class="text-center">
+            <button type="button" class="btn btn-danger btn-sm remover-item">❌</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ======= Totais ======= -->
+  <div class="d-flex justify-content-end mb-3">
+    <h5 class="me-4">{{ _('Total Geral') }}: <strong id="total_geral" class="text-success">{{ "%.2f"|format(total_geral) }} MT</strong></h5>
+    <h5>{{ _('Total Lucro') }}: <strong id="total_lucro" class="text-warning">{{ "%.2f"|format(total_lucro) }} MT</strong></h5>
+  </div>
+
+  <!-- ======= Formulário de pagamento ======= -->
+  <form method="POST" action="{{ url_for('vendas.pagar_venda') }}">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-4">
+        <label class="form-label">{{ _('Método de Pagamento') }}</label>
+        <select class="form-select" name="metodo_pagamento" required>
+          <option value="dinheiro">{{ _('Dinheiro') }}</option>
+          <option value="cartao">{{ _('Cartão') }}</option>
+          <option value="transferencia">{{ _('Transferência') }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">{{ _('Valor Pago (MT)') }}</label>
+        <input type="number" step="0.01" class="form-control" name="valor_pago" id="valor_pago" value="{{ total_geral }}" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">{{ _('Troco (MT)') }}</label>
+        <input type="text" class="form-control" id="troco" value="0.00" readonly>
+      </div>
+      <div class="col-md-2 mt-4">
+        <button type="submit" class="btn btn-primary fw-bold w-100">{{ _('Finalizar Venda') }}</button>
+      </div>
+    </div>
+  </form>
+
+  {% else %}
+  <div class="alert alert-info text-center">{{ _('Nenhum produto no carrinho.') }}</div>
+  {% endif %}
+</div>
+
+<!-- ======= Scripts ======= -->
+<!-- jQuery + jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+<script>
+$(function() {
+    // ======= Autocomplete produtos =======
+    $("#produto_nome").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "{{ url_for('vendas.buscar_produtos') }}",
+                data: { q: request.term },
+                success: function(data) {
+                    response($.map(data, function(item) {
+                        return {
+                            label: item.nome + " (" + item.codigo + ")",
+                            value: item.nome,
+                            codigo: item.codigo
+                        };
+                    }));
+                }
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            $("#codigo_produto").val(ui.item.codigo);
+        }
+    });
+
+    // ======= Atualiza totais e troco =======
+    function atualizarTotais() {
+        let total = 0, lucro = 0;
+        $('.linha-dove').each(function() {
+            total += parseFloat($(this).find('.valor_total').text());
+            lucro += parseFloat($(this).find('.lucro_total').text());
+        });
+        $('#total_geral').text(total.toFixed(2) + ' MT');
+        $('#total_lucro').text(lucro.toFixed(2) + ' MT');
+        calcularTroco();
+    }
+
+    function calcularTroco() {
+        let valorPago = parseFloat($('#valor_pago').val()) || 0;
+        let total = parseFloat($('#total_geral').text().replace(' MT','')) || 0;
+        $('#troco').val((valorPago - total).toFixed(2));
+    }
+
+    // ======= Remover item do carrinho =======
+    $('.remover-item').click(function() {
+        $(this).closest('tr').remove();
+        atualizarTotais();
+    });
+
+    $('#valor_pago').on('input', calcularTroco);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .linha-dove {
+    background-color: #e8e8e3 !important;
+    border-bottom: 1px dashed #a9a9a9 !important;
+  }
+  .linha-dove:nth-child(even) {
+    background-color: #f3f3ef !important;
+  }
+  .linha-dove:hover {
+    background-color: #dddcd6 !important;
+    cursor: pointer;
+  }
+  .tabela-lerp thead {
+    background-color: #10214b !important;
+    color: white !important;
+    text-transform: uppercase;
+  }
+  .tabela-lerp {
+    border: 1px solid #c3c3c3 !important;
+  }
+  .tabela-lerp td, .tabela-lerp th {
+    border: 1px dashed #bcbcbc !important;
+  }
+  .tabela-scroll {
+    max-height: 350px;
+    overflow-y: auto;
+  }
+</style>
+
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white;">
+  <h3 class="fw-bold mb-4 text-center">🛒 {{ _("Lista de Compras") }}</h3>
+
+  <!-- Botões superiores -->
+  <div class="d-flex justify-content-between mb-3">
+    <div>
+      <a href="{{ url_for('compras.exportar_excel') }}" class="btn btn-light btn-sm fw-bold">
+        📊 {{ _("Exportar Excel") }}
+      </a>
+      <a href="{{ url_for('compras.exportar_pdf') }}" class="btn btn-light btn-sm fw-bold">
+        📄 {{ _("Exportar PDF") }}
+      </a>
+    </div>
+    <a href="{{ url_for('compras.nova_compra') }}" class="btn btn-success fw-bold">
+      ➕ {{ _("Nova Compra") }}
+    </a>
+  </div>
+
+  <!-- Filtro -->
+  <form method="GET" class="d-flex mb-3">
+    <select name="campo" class="form-select w-25 me-2">
+      <option value="produto">{{ _("Produto") }}</option>
+      <option value="codigo">{{ _("Código") }}</option>
+      <option value="categoria">{{ _("Categoria") }}</option>
+    </select>
+    <input type="text" name="filtro" class="form-control w-50 me-2" placeholder="{{ _('Pesquisar...') }}">
+    <button class="btn btn-dark fw-bold">🔍 {{ _("Filtrar") }}</button>
+  </form>
+
+  {% if compras %}
+  <div class="card shadow-sm border-0">
+    <div class="tabela-scroll">
+      <table class="table table-hover table-bordered tabela-lerp">
+        <thead>
+          <tr>
+            <th>{{ _("Código") }}</th>
+            <th>{{ _("Produto") }}</th>
+            <th>{{ _("Categoria") }}</th>
+            <th>{{ _("Preço Compra (MT)") }}</th>
+            <th>{{ _("Quantidade") }}</th>
+            <th>{{ _("Valor Total (MT)") }}</th>
+            <th>{{ _("Stock Atual") }}</th>
+            <th>{{ _("Data da Compra") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in compras %}
+          <tr class="linha-dove">
+            <td>{{ c.codigo_produto }}</td>
+            <td>{{ c.produto }}</td>
+            <td>{{ c.categoria }}</td>
+            <td>{{ "%.2f"|format(c.preco_compra) }}</td>
+            <td>{{ "%.2f"|format(c.quantidade) }}</td>
+            <td class="fw-bold text-primary text-end">{{ "%.2f"|format(c.valor_total) }}</td>
+            <td class="text-center">{{ produtos[c.produto] if c.produto in produtos else '—' }}</td>
+            <td>{{ c.data_compra.strftime("%d/%m/%Y %H:%M") if c.data_compra else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer bg-light d-flex justify-content-end">
+      <h5 class="text-dark">
+        {{ _("Total Geral") }}:
+        <strong class="text-success">{{ "%.2f"|format(total_geral) }} MT</strong>
+      </h5>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center mt-4">
+    {{ _("Nenhuma compra registrada.") }}
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

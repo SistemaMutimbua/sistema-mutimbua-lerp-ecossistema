@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 p-4 rounded" style="background-color: #c7d4ee; border: 1px solid #8fa7d1;">
+
+    <h3 class="mb-3" style="color:#0d1b2a; font-weight: bold;">
+        {{ _("Nova Venda") }}
+    </h3>
+
+    <!-- Formulário para adicionar produtos -->
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <!-- Código do Produto -->
+        <div class="mb-3">
+            <label class="form-label" style="color:#0d1b2a;">{{ form.codigo_produto.label.text }}</label>
+            {{ form.codigo_produto(class="form-control") }}
+        </div>
+
+        <!-- Nome do Produto -->
+        <div class="mb-3">
+            <label class="form-label" style="color:#0d1b2a;">{{ form.produto.label.text }}</label>
+            {{ form.produto(class="form-control") }}
+        </div>
+
+        <!-- Preço Unitário -->
+        <div class="mb-3">
+            <label class="form-label" style="color:#0d1b2a;">{{ form.preco_unitario.label.text }}</label>
+            {{ form.preco_unitario(class="form-control", step="0.01") }}
+        </div>
+
+        <!-- Quantidade -->
+        <div class="mb-3">
+            <label class="form-label" style="color:#0d1b2a;">{{ form.quantidade.label.text }}</label>
+            {{ form.quantidade(class="form-control") }}
+        </div>
+
+        <!-- Botões -->
+        <div class="d-flex justify-content-end gap-2 mb-4">
+            {{ form.submit(class="btn", style="background-color:#0d1b2a; color:white;", value=_("Adicionar Produto")) }}
+
+            {% if carrinho %}
+            <!-- Botão abrir modal de pagamento -->
+            <button type="button" class="btn" style="background-color:#b02a37; color:white;" data-bs-toggle="modal" data-bs-target="#modalPagamento">
+                {{ _("Pagar Agora") }}
+            </button>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if carrinho %}
+    <hr>
+    <h5 class="text-secondary">{{ _("Itens da Venda") }}</h5>
+
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead style="background-color:#0d1b2a; color:white;">
+                <tr>
+                    <th>#</th>
+                    <th>{{ _("Código") }}</th>
+                    <th>{{ _("Produto") }}</th>
+                    <th>{{ _("Preço Unit.") }}</th>
+                    <th>{{ _("Quantidade") }}</th>
+                    <th>{{ _("Total") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in carrinho %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.codigo }}</td>
+                    <td>{{ item.produto }}</td>
+                    <td>{{ "%.2f"|format(item.preco_unitario) }}</td>
+                    <td>{{ item.quantidade }}</td>
+                    <td>{{ "%.2f"|format(item.valor_total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Total Geral -->
+    <div class="alert alert-info d-flex justify-content-between align-items-center mt-3">
+        <strong>{{ _("Total Geral:") }}</strong>
+        <span class="fw-bold">{{ "%.2f"|format(total_geral) }} MT</span>
+    </div>
+
+    <!-- Modal de Pagamento -->
+    <div class="modal fade" id="modalPagamento" tabindex="-1" aria-labelledby="modalPagamentoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header" style="background-color:#0d1b2a; color:white;">
+                    <h5 class="modal-title" id="modalPagamentoLabel">{{ _("Pagamento da Venda") }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('vendas.pagar_venda') }}">
+
+                        {% for item in carrinho %}
+                        <input type="hidden" name="produto_id[]" value="{{ item.produto_id }}">
+                        <input type="hidden" name="quantidade[]" value="{{ item.quantidade }}">
+                        <input type="hidden" name="preco_unitario[]" value="{{ item.preco_unitario }}">
+                        {% endfor %}
+
+                        <input type="hidden" name="total" value="{{ total_geral }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ _("Método de Pagamento") }}</label>
+                            <select class="form-select" name="metodo_pagamento" required>
+                                <option value="dinheiro">{{ _("Dinheiro") }}</option>
+                                <option value="cartao">{{ _("Cartão") }}</option>
+                                <option value="transferencia">{{ _("Transferência") }}</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ _("Valor Pago") }}</label>
+                            <input type="number" step="0.01" name="valor_pago" class="form-control" value="{{ total_geral }}" required>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn" style="background-color:#b02a37; color:white;">
+                                {{ _("Confirmar Pagamento") }}
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}

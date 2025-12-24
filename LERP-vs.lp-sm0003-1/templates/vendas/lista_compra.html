@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="text-primary">Lista de Compras</h3>
+
+  <form method="GET" class="row mb-3">
+    <div class="col-md-4">
+      <input type="text" name="filtro" class="form-control" placeholder="Buscar por produto...">
+    </div>
+    <div class="col-md-4">
+      <select name="categoria" class="form-select">
+        <option value="">Todas as Categorias</option>
+        <option value="ferragem">Ferragem</option>
+        <option value="loja">Loja</option>
+        <option value="botle store">Botle Store</option>
+      </select>
+    </div>
+    <div class="col-md-4 text-end">
+      <a href="{{ url_for('compras.exportar_excel') }}" class="btn btn-outline-success">Exportar Excel</a>
+      <a href="{{ url_for('compras.exportar_pdf') }}" class="btn btn-outline-danger">Exportar PDF</a>
+    </div>
+  </form>
+
+  <table class="table table-bordered table-striped">
+    <thead class="table-primary">
+      <tr>
+        <th>Nº</th>
+        <th>Código Produto</th>
+        <th>Produto</th>
+        <th>Categoria</th>
+        <th>Preço Compra</th>
+        <th>Quantidade</th>
+        <th>Valor Total</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in compras %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ c.codigo_produto }}</td>
+        <td>{{ c.produto }}</td>
+        <td>{{ c.categoria }}</td>
+        <td>{{ "%.2f"|format(c.preco_compra) }} MT</td>
+        <td>{{ c.quantidade }}</td>
+        <td>{{ "%.2f"|format(c.valor_total) }} MT</td>
+        <td>{{ c.data_compra.strftime("%d/%m/%Y") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="alert alert-info mt-3">
+    <strong>Total Geral:</strong> {{ "%.2f"|format(total_geral) }} MT
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Vendas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="fw-bold mb-4">📊 Dashboard de Vendas</h2>
+
+    <!-- Totais do dia -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _("Vendas Hoje") }}</h5>
+                    <h4 class="fw-bold">{{ "{:,.2f}".format(vendas_hoje) }} MT</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _("Lucro Hoje") }}</h5>
+                    <h4 class="fw-bold">{{ "{:,.2f}".format(lucro_hoje) }} MT</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Totais gerais -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _("Total de Vendas") }}</h5>
+                    <h4 class="fw-bold">{{ "{:,.2f}".format(total_vendas) }} MT</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _("Total de Lucro") }}</h5>
+                    <h4 class="fw-bold">{{ "{:,.2f}".format(total_lucro) }} MT</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimas vendas -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">{{ _("Últimas Vendas") }}</div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>{{ _("Código") }}</th>
+                        <th>{{ _("Valor Total (MT)") }}</th>
+                        <th>{{ _("Lucro (MT)") }}</th>
+                        <th>{{ _("Data") }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venda in ultimas_vendas %}
+                    <tr>
+                        <td>{{ venda.codigo_venda }}</td>
+                        <td>{{ "%.2f"|format(venda.total_valor) }}</td>
+                        <td>{{ "%.2f"|format(venda.total_lucro) }}</td>
+                        <td>{{ venda.data_venda.strftime("%d/%m/%Y %H:%M") }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">{{ _("Nenhuma venda registrada") }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Gráficos 30 dias -->
+    <div class="card shadow-sm">
+        <div class="card-header">{{ _("Vendas últimos 30 dias") }}</div>
+        <div class="card-body">
+            <canvas id="chartVendas"></canvas>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('chartVendas').getContext('2d');
+const chartVendas = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|tojson }},
+        datasets: [
+            {
+                label: '{{ _("Vendas (MT)") }}',
+                data: {{ chart_vendas|tojson }},
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3
+            },
+            {
+                label: '{{ _("Lucro (MT)") }}',
+                data: {{ chart_lucro|tojson }},
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.3
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' }
+        }
+    }
+});
+</script>
+{% endblock %}

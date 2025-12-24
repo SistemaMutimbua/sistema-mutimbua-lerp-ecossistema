@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="text-primary">{{ _("Dashboard de Relatórios") }}</h3>
+
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-header">{{ _("Entradas") }}</div>
+        <div class="card-body">
+          <h5 class="card-title">{{ "%.2f"|format(total_entradas) }} MT</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white bg-danger mb-3">
+        <div class="card-header">{{ _("Saídas") }}</div>
+        <div class="card-body">
+          <h5 class="card-title">{{ "%.2f"|format(total_saidas) }} MT</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white bg-info mb-3">
+        <div class="card-header">{{ _("Saldo") }}</div>
+        <div class="card-body">
+          <h5 class="card-title">{{ "%.2f"|format(saldo) }} MT</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h5 class="mt-4">{{ _("Top 5 Produtos Mais Vendidos") }}</h5>
+  <ul class="list-group mb-3">
+    {% for p in top_vendidos %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ p.produto }}
+        <span class="badge bg-primary rounded-pill">{{ p.total_vendido }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h5 class="mt-4">{{ _("Top 5 Produtos Mais Comprados") }}</h5>
+  <ul class="list-group mb-3">
+    {% for p in top_comprados %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ p.produto }}
+        <span class="badge bg-warning rounded-pill">{{ p.total_comprado }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h5 class="mt-4">{{ _("Stock Remanescente") }}</h5>
+  <table class="table table-bordered table-striped">
+    <thead class="table-primary">
+      <tr>
+        <th>{{ _("Produto") }}</th>
+        <th>{{ _("Categoria") }}</th>
+        <th>{{ _("Stock") }}</th>
+        <th>{{ _("Estado") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in produtos %}
+      <tr>
+        <td>{{ p.nome }}</td>
+        <td>{{ p.categoria }}</td>
+        <td>{{ p.stock }}</td>
+        <td>
+          {% if p.estado == 'normal' %}
+            <span class="badge bg-success">{{ _("Normal") }}</span>
+          {% else %}
+            <span class="badge bg-danger">{{ _("Alerta") }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

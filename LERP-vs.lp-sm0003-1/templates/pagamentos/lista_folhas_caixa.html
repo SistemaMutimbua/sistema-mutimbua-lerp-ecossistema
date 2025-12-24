@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color: #132a63; color: white;">
+
+    <h3 class="fw-bold mb-4">🧾 {{ _("Folhas de Caixa") }}</h3>
+
+    <!-- Tabela -->
+    <div class="table-responsive tabela-scroll">
+        <table class="table table-hover table-bordered tabela-lerp">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>#</th>
+                    <th>{{ _("Data") }}</th>
+                    <th>{{ _("Tipo de Pagamento") }}</th>
+                    <th>{{ _("Total Entrada (MT)") }}</th>
+                    <th>{{ _("Total Saída (MT)") }}</th>
+                    <th>{{ _("Detalhes") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in folhas %}
+                <tr class="linha-dove">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ f.data.strftime("%d/%m/%Y") }}</td>
+                    <td>{{ f.tipo_pagamento }}</td>
+                    <td>{{ "%.2f"|format(f.total_entrada) }}</td>
+                    <td>{{ "%.2f"|format(f.total_saida) }}</td>
+                    <td>{{ f.detalhes or "" }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">{{ _("Nenhuma folha encontrada.") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<style>
+/* Mesmos estilos do outro template */
+.linha-dove { background-color: #e8e8e3 !important; border-bottom: 1px dashed #a9a9a9 !important; }
+.linha-dove:nth-child(even) { background-color: #f3f3ef !important; }
+.linha-dove:hover { background-color: #dddcd6 !important; cursor: pointer; }
+.tabela-lerp { border: 1px solid #c5c5c5 !important; }
+.tabela-lerp td, .tabela-lerp th { border: 1px dashed #bcbcbc !important; }
+.tabela-scroll { max-height: 400px; overflow-y: auto; }
+.sticky-top th { position: sticky; top: 0; background-color: #132a63 !important; color: white !important; z-index: 2; }
+</style>
+
+{% endblock %}

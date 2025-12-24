@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color:#132a63; color:white;">
+    <h3 class="fw-bold mb-4">📝 {{ titulo_pagina }}</h3>
+
+    <!-- Filtros -->
+    <form method="get" class="row mb-3 g-2">
+        <div class="col-md-3">
+            <input type="text" name="usuario" class="form-control" placeholder="{{ _('Filtrar por usuário') }}" value="{{ filtros.usuario or '' }}">
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="modulo" class="form-control" placeholder="{{ _('Filtrar por módulo') }}" value="{{ filtros.modulo or '' }}">
+        </div>
+        <div class="col-md-2">
+            <select name="nivel" class="form-select">
+                <option value="">{{ _('Todos os níveis') }}</option>
+                <option value="info" {% if filtros.nivel=='info' %}selected{% endif %}>Info</option>
+                <option value="alerta" {% if filtros.nivel=='alerta' %}selected{% endif %}>Alerta</option>
+                <option value="critico" {% if filtros.nivel=='critico' %}selected{% endif %}>Crítico</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-dark w-100">{{ _('Filtrar') }}</button>
+        </div>
+    </form>
+
+    <!-- Tabela -->
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered tabela-lerp">
+            <thead style="background-color:#10214b; color:white;">
+                <tr>
+                    <th>#</th>
+                    <th>Usuário</th>
+                    <th>Ação</th>
+                    <th>Módulo</th>
+                    <th>Registro ID</th>
+                    <th>Nível</th>
+                    <th>Data/Hora</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in registros %}
+                <tr class="{% if r.nivel=='critico' %}linha-alerta{% elif r.nivel=='alerta' %}linha-aviso{% else %}linha-dove{% endif %}">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ r.usuario }}</td>
+                    <td>{{ r.acao }}</td>
+                    <td>{{ r.modulo }}</td>
+                    <td>{{ r.registro_id or '—' }}</td>
+                    <td>{{ r.nivel|capitalize }}</td>
+                    <td>{{ r.timestamp.strftime("%d/%m/%Y %H:%M") }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Nenhum registro encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.linha-dove { background-color:#e8e8e3; }
+.linha-dove:nth-child(even){ background-color:#f3f3ef; }
+.linha-dove:hover { background-color:#dddcd6; cursor:pointer; }
+
+.linha-aviso { background-color:#fff3cd !important; }
+.linha-alerta { background-color:#f8d7da !important; }
+</style>
+
+{% endblock %}

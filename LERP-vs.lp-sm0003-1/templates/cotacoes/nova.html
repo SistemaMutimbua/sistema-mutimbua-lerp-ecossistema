@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Nova Cotação{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="fw-bold mb-4">📝 Nova Cotação</h2>
+
+    <!-- Formulário Cliente -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="clienteInput" class="form-label">Cliente</label>
+            <input type="text" id="clienteInput" class="form-control" name="cliente" placeholder="Digite o nome do cliente..." value="{{ form.cliente.data or '' }}">
+        </div>
+    </div>
+
+    <!-- Busca de produtos -->
+    <div class="row mb-3">
+        <div class="col-md-7 position-relative">
+            <input type="text" id="produtoInput" class="form-control" placeholder="Digite nome ou código do produto...">
+            <div id="autocompleteList" class="list-group position-absolute w-100" style="z-index:1000;"></div>
+        </div>
+        <div class="col-md-2">
+            <input type="number" id="quantidadeInput" class="form-control" min="1" value="1">
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-success w-100" id="btnAdicionar">
+                Adicionar <i class="bi bi-cart-plus-fill"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Carrinho -->
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover align-middle" id="tabelaCarrinho">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Preço Unitário (MT)</th>
+                    <th>Subtotal (MT)</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Total e finalizar -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <h5>Total: <span id="totalCotacao">0.00</span> MT</h5>
+        <button type="button" class="btn btn-primary btn-lg" id="btnFinalizar" disabled>
+            Salvar Cotação <i class="bi bi-save-fill ms-1"></i>
+        </button>
+    </div>
+
+    <!-- Toasts Bootstrap -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="toastContainer"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let carrinho = [];
+
+    // Carregar itens da sessão se existir
+    {% if session.get('carrinho_venda') %}
+        carrinho = {{ session.get('carrinho_venda')|tojson }};
+    {% endif %}
+
+    // Função para mostrar toast
+    function showToast(mensagem, tipo="success") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast align-items-center text-bg-${tipo} border-0`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${mensagem}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        container.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    // Atualiza tabela do carrinho
+    function atualizarCarrinho() {
+        const tbody = document.querySelector("#tabelaCarrinho tbody");
+        tbody.innerHTML = "";
+        let total = 0;
+
+        carrinho.forEach((item, index) => {
+            const subtotal = item.preco_unitario * item.quantidade;
+            total += subtotal;
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${item.nome}</td>
+                <td><input type="number" min="1" value="${item.quantidade}" class="form-control quantidade" style="width:80px;"></td>
+                <td>${item.preco_unitario.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                <td class="subtotal text-success fw-bold">${subtotal.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                <td>
+                    <button class="btn btn-outline-danger btn-sm remover" title="Remover">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+
+            // Remover item
+            tr.querySelector(".remover").addEventListener("click", () => {
+                carrinho.splice(index, 1);
+                atualizarCarrinho();
+            });
+
+            // Alterar quantidade
+            tr.querySelector(".quantidade").addEventListener("input", (e) => {
+                item.quantidade = parseInt(e.target.value) || 1;
+                atualizarCarrinho();
+            });
+        });
+
+        document.getElementById("totalCotacao").innerText = total.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+        document.getElementById("btnFinalizar").disabled = carrinho.length === 0;
+    }
+
+    // Autocomplete produtos
+    const produtoInput = document.getElementById("produtoInput");
+    const autocompleteList = document.getElementById("autocompleteList");
+
+    produtoInput.addEventListener("input", async () => {
+        const termo = produtoInput.value.trim();
+        if (!termo) {
+            autocompleteList.innerHTML = "";
+            return;
+        }
+
+        const resp = await fetch(`/vendas/buscar_produtos?q=${encodeURIComponent(termo)}`);
+        const produtos = await resp.json();
+
+        autocompleteList.innerHTML = "";
+        produtos.forEach(p => {
+            const item = document.createElement("a");
+            item.href = "#";
+            item.className = "list-group-item list-group-item-action";
+            item.textContent = `${p.nome} (${p.codigo}) - ${p.preco.toLocaleString('pt-BR', {minimumFractionDigits:2})} MT`;
+            item.dataset.id = p.id;
+            item.dataset.nome = p.nome;
+            item.dataset.preco = p.preco;
+            item.addEventListener("click", (e) => {
+                e.preventDefault();
+                produtoInput.value = p.nome;
+                produtoInput.dataset.id = p.id;
+                produtoInput.dataset.preco = p.preco;
+                autocompleteList.innerHTML = "";
+            });
+            autocompleteList.appendChild(item);
+        });
+    });
+
+    // Adicionar produto ao carrinho
+    document.getElementById("btnAdicionar").addEventListener("click", () => {
+        const id = produtoInput.dataset.id;
+        const nome = produtoInput.value;
+        const preco = parseFloat(produtoInput.dataset.preco || 0);
+        const quantidade = parseInt(document.getElementById("quantidadeInput").value) || 1;
+
+        if (!id || !nome || preco <= 0) {
+            showToast("Selecione um produto válido.", "danger");
+            return;
+        }
+
+        const existente = carrinho.find(i => i.produto_id == id);
+        if (existente) {
+            existente.quantidade += quantidade;
+        } else {
+            carrinho.push({produto_id: id, nome, preco_unitario: preco, quantidade});
+        }
+
+        produtoInput.value = "";
+        delete produtoInput.dataset.id;
+        delete produtoInput.dataset.preco;
+        document.getElementById("quantidadeInput").value = 1;
+
+        atualizarCarrinho();
+    });
+
+    // Salvar cotação via POST
+    document.getElementById("btnFinalizar").addEventListener("click", () => {
+        if (carrinho.length === 0) {
+            showToast("Adicione pelo menos um item.", "danger");
+            return;
+        }
+
+        const cliente = document.getElementById("clienteInput").value.trim();
+        if (!cliente) {
+            showToast("Informe o cliente da cotação.", "danger");
+            return;
+        }
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "{{ url_for('cotacoes.nova_cotacao') }}";
+
+        const inputCliente = document.createElement("input");
+        inputCliente.type = "hidden";
+        inputCliente.name = "cliente";
+        inputCliente.value = cliente;
+        form.appendChild(inputCliente);
+
+        const inputItens = document.createElement("input");
+        inputItens.type = "hidden";
+        inputItens.name = "itens";
+        inputItens.value = JSON.stringify(carrinho);
+        form.appendChild(inputItens);
+
+        document.body.appendChild(form);
+        form.submit();
+    });
+
+    atualizarCarrinho();
+});
+</script>
+{% endblock %}

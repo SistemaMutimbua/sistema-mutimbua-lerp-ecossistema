@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-3">{{ titulo_pagina }}</h3>
+
+    <!-- Botão para criar nova notificação -->
+    <a href="{{ url_for('notificacoes.criar_notificacao') }}" class="btn btn-primary mb-3">
+        <i class="bi bi-plus-lg"></i> Criar Notificação
+    </a>
+
+    <!-- Alertas -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Tabela de notificações -->
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Título</th>
+                <th>Mensagem</th>
+                <th>Tipo</th>
+                <th>Data</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for n in notificacoes %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ n.titulo }}</td>
+                <td>{{ n.mensagem }}</td>
+                <td>{{ n.tipo }}</td>
+                <td>{{ n.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('notificacoes.apagar_notificacao', id=n.id) }}" 
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Tem certeza que deseja apagar esta notificação?');">
+                        Apagar
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhuma notificação encontrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

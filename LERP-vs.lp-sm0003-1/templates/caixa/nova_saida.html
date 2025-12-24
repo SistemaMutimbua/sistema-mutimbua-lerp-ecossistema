@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4 p-4 rounded" style="background-color: #c7d4ee; border: 1px solid #8fa7d1;">
+
+    <h3 class="mb-4 fw-bold" style="color:#0d1b2a;">💸 {{ _("Registrar Saída de Caixa") }}</h3>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <!-- Valor -->
+        <div class="mb-3">
+            <label for="valor" class="form-label" style="color:#0d1b2a;">{{ _(form.valor.label.text) }}</label>
+            {{ form.valor(class="form-control", id="valor", placeholder=_("Digite o valor da saída")) }}
+        </div>
+
+        <!-- Justificativa -->
+        <div class="mb-3">
+            <label for="justificativa" class="form-label" style="color:#0d1b2a;">{{ _(form.justificativa.label.text) }}</label>
+            {{ form.justificativa(class="form-control", id="justificativa", placeholder=_("Motivo da saída")) }}
+        </div>
+
+        <!-- Botões -->
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('caixa.lista_caixa') }}" class="btn btn-secondary fw-bold">
+                {{ _("Cancelar") }}
+            </a>
+            {{ form.submit(class="btn fw-bold", style="background-color:#d9534f; color:white;", value=_("Registrar Saída")) }}
+        </div>
+    </form>
+</div>
+
+{% endblock %}

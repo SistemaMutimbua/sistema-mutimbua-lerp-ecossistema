@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h3>{{ _("Novo Pagamento") }}</h3>
+
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    <!-- Valor do pagamento -->
+    <div class="mb-3">
+      {{ form.valor.label(class="form-label") }}
+      {% if venda %}
+        <!-- Se veio de uma venda, exibe valor e bloqueia edição -->
+        {{ form.valor(class="form-control", value=venda.total, readonly=True) }}
+      {% else %}
+        {{ form.valor(class="form-control", placeholder=_("Digite o valor")) }}
+      {% endif %}
+      {% for err in form.valor.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <!-- Preço unitário -->
+    <div class="mb-3">
+      {{ form.preco_unitario.label(class="form-label") }}
+      {{ form.preco_unitario(class="form-control", placeholder=_("Preço unitário (opcional)")) }}
+      {% for err in form.preco_unitario.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <!-- Tipo de pagamento -->
+    <div class="mb-3">
+      {{ form.tipo_pagamento.label(class="form-label") }}
+      {{ form.tipo_pagamento(class="form-select") }}
+      {% for err in form.tipo_pagamento.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <!-- Referência / Observação -->
+    <div class="mb-3">
+      {{ form.referencia.label(class="form-label") }}
+      {{ form.referencia(class="form-control", placeholder=_("Observação / referência")) }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ _("Registrar Pagamento") }}</button>
+    <a href="{{ url_for('pagamentos.lista_pagamentos') }}" class="btn btn-secondary">{{ _("Cancelar") }}</a>
+  </form>
+</div>
+{% endblock %}
